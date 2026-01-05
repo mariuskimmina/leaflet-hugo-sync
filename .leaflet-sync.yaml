@@ -1,0 +1,16 @@
+source:
+  handle: "marius.bsky.social"
+  collection: "com.whtwnd.blog.entry"
+
+output:
+  posts_dir: "content/posts/leaflet"
+  images_dir: "static/images/leaflet"
+  image_path_prefix: "/images/leaflet"
+
+template:
+  frontmatter: |
+    ---
+    title: "{{ .Title }}"
+    date: {{ .CreatedAt }}
+    original_url: "https://leaflet.pub/{{ .Handle }}/{{ .Slug }}"
+    ---
