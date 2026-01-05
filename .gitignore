@@ -1,1 +1,6 @@
 leaflet-hugo-sync
+
+# Nix
+result
+result-*
+.direnv
