@@ -14,12 +14,13 @@ type Generator struct {
 }
 
 type PostData struct {
-	Title     string
-	CreatedAt string
-	Slug      string
-	Handle    string
-	Content   string
-	Data      map[string]interface{}
+	Title       string
+	CreatedAt   string
+	Slug        string
+	Handle      string
+	OriginalURL string
+	Content     string
+	Data        map[string]interface{}
 }
 
 func NewGenerator(cfg *config.Config) *Generator {
@@ -27,13 +28,30 @@ func NewGenerator(cfg *config.Config) *Generator {
 }
 
 func (g *Generator) GeneratePost(data PostData) error {
-	tmpl, err := template.New("frontmatter").Parse(g.Cfg.Template.Frontmatter)
+	// 1. Generate Frontmatter
+	tmplFM, err := template.New("frontmatter").Parse(g.Cfg.Template.Frontmatter)
 	if err != nil {
 		return err
 	}
 
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
+	var bufFM bytes.Buffer
+	if err := tmplFM.Execute(&bufFM, data); err != nil {
+		return err
+	}
+
+	// 2. Generate Content
+	contentTmplStr := g.Cfg.Template.Content
+	if contentTmplStr == "" {
+		contentTmplStr = "{{ .Content }}" // Default
+	}
+
+	tmplContent, err := template.New("content").Parse(contentTmplStr)
+	if err != nil {
+		return err
+	}
+
+	var bufContent bytes.Buffer
+	if err := tmplContent.Execute(&bufContent, data); err != nil {
 		return err
 	}
 
@@ -44,7 +62,7 @@ func (g *Generator) GeneratePost(data PostData) error {
 	fileName := data.Slug + ".md"
 	filePath := filepath.Join(g.Cfg.Output.PostsDir, fileName)
 
-	fullContent := buf.String() + "\n" + data.Content
+	fullContent := bufFM.String() + "\n" + bufContent.String()
 
 	return os.WriteFile(filePath, []byte(fullContent), 0644)
 }

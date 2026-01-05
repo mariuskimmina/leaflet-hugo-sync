@@ -13,18 +13,20 @@ type Config struct {
 }
 
 type Source struct {
-	Handle     string `yaml:"handle"`
-	Collection string `yaml:"collection"`
+	Handle          string `yaml:"handle"`
+	Collection      string `yaml:"collection"`
+	PublicationName string `yaml:"publication_name"`
 }
 
 type Output struct {
 	PostsDir        string `yaml:"posts_dir"`
-	ImagesDir        string `yaml:"images_dir"`
+	ImagesDir       string `yaml:"images_dir"`
 	ImagePathPrefix string `yaml:"image_path_prefix"`
 }
 
 type Template struct {
 	Frontmatter string `yaml:"frontmatter"`
+	Content     string `yaml:"content"`
 }
 
 func LoadConfig(path string) (*Config, error) {
