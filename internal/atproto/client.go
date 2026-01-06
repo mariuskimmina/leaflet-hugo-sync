@@ -56,16 +56,6 @@ type Service struct {
 
 // ResolvePDS finds the PDS endpoint for a given DID using plc.directory
 func (c *Client) ResolvePDS(ctx context.Context, did string) (string, error) {
-	// 1. Try describeRepo first (if we are on the AppView, it works and is faster)
-	desc, err := atproto.RepoDescribeRepo(ctx, c.XRPC, did)
-	if err == nil && desc.DidDoc != nil {
-		// Parse the DidDoc from the response
-		// Note: indigo might return it as a map or struct.
-		// Let's rely on the public directory if this fails or is complex to parse from the generic type.
-		// Actually, let's just use the PLC directory directly for simplicity and reliability.
-	}
-
-	// 2. Fallback to PLC Directory
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("https://plc.directory/%s", did), nil)
 	if err != nil {
 		return "", err
