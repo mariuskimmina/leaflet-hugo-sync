@@ -160,7 +160,8 @@ func main() {
 		postData := generator.PostData{
 			Title:       doc.Title,
 			CreatedAt:   doc.PublishedAt,
-			Slug:        filename,
+			Slug:        slug,
+			Filename:    filename,
 			Handle:      cfg.Source.Handle,
 			OriginalURL: originalURL,
 			Content:     finalContent,
