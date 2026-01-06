@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/marius/leaflet-hugo-sync/internal/atproto"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/atproto"
 )
 
 func TestConvertLeaflet_TextBlock(t *testing.T) {

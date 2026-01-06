@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/marius/leaflet-hugo-sync/internal/config"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/config"
 )
 
 func TestGeneratePost(t *testing.T) {

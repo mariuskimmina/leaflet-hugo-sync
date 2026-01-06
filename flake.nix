@@ -30,7 +30,7 @@
 
             meta = with pkgs.lib; {
               description = "Sync Leaflet (ATproto) blog posts to Hugo-compatible markdown";
-              homepage = "https://github.com/marius/leaflet-hugo-sync";
+              homepage = "https://github.com/mariuskimmina/leaflet-hugo-sync";
               license = licenses.mit;
               mainProgram = "leaflet-hugo-sync";
             };
