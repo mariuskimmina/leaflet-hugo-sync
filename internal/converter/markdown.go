@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/marius/leaflet-hugo-sync/internal/atproto"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/atproto"
 )
 
 type Converter struct {

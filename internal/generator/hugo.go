@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/marius/leaflet-hugo-sync/internal/config"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/config"
 )
 
 type Generator struct {

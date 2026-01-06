@@ -8,11 +8,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/marius/leaflet-hugo-sync/internal/atproto"
-	"github.com/marius/leaflet-hugo-sync/internal/config"
-	"github.com/marius/leaflet-hugo-sync/internal/converter"
-	"github.com/marius/leaflet-hugo-sync/internal/generator"
-	"github.com/marius/leaflet-hugo-sync/internal/media"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/atproto"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/config"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/converter"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/generator"
+	"mariuskimmina.com/leaflet-hugo-sync/internal/media"
 )
 
 func lastPathPart(uri string) string {

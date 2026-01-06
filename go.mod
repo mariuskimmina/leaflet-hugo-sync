@@ -1,4 +1,4 @@
-module github.com/marius/leaflet-hugo-sync
+module mariuskimmina.com/leaflet-hugo-sync
 
 go 1.25.5
 
