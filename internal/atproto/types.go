@@ -36,7 +36,7 @@ type LeafletPublication struct {
 }
 
 type Page struct {
-	Type   string       `json:"$type"` // pub.leaflet.pages.linearDocument
+	Type   string         `json:"$type"` // pub.leaflet.pages.linearDocument
 	Blocks []BlockWrapper `json:"blocks"`
 }
 
@@ -68,9 +68,9 @@ type UnorderedListBlock struct {
 }
 
 type ListItem struct {
-	Type    string          `json:"$type"` // pub.leaflet.blocks.unorderedList#listItem
-	Content json.RawMessage `json:"content"` // Usually a TextBlock
-	Children []ListItem     `json:"children"` // Nested lists?
+	Type     string          `json:"$type"`    // pub.leaflet.blocks.unorderedList#listItem
+	Content  json.RawMessage `json:"content"`  // Usually a TextBlock
+	Children []ListItem      `json:"children"` // Nested lists?
 }
 
 type ImageBlock struct {
@@ -80,13 +80,13 @@ type ImageBlock struct {
 }
 
 type BskyPostBlock struct {
-    Type string `json:"$type"`
-    PostRef PostRef `json:"postRef"`
+	Type    string  `json:"$type"`
+	PostRef PostRef `json:"postRef"`
 }
 
 type PostRef struct {
-    Uri string `json:"uri"`
-    Cid string `json:"cid"`
+	Uri string `json:"uri"`
+	Cid string `json:"cid"`
 }
 
 // Shared Types
@@ -108,9 +108,9 @@ type Feature struct {
 }
 
 type Embed struct {
-	Type     string          `json:"$type"`
-	Images   []ImageEmbed    `json:"images,omitempty"`
-	External *ExternalEmbed  `json:"external,omitempty"`
+	Type     string         `json:"$type"`
+	Images   []ImageEmbed   `json:"images,omitempty"`
+	External *ExternalEmbed `json:"external,omitempty"`
 }
 
 type ImageEmbed struct {

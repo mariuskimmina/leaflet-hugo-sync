@@ -9,8 +9,7 @@ import (
 )
 
 type Converter struct {
-	// We might need to track image downloads here or just return image references?
-	// For now, let's just return the Markdown text and a list of image blobs to download.
+	// No state needed; conversion is stateless
 }
 
 type ConversionResult struct {
@@ -72,25 +71,18 @@ func (c *Converter) ConvertLeaflet(doc *atproto.LeafletDocument) (*ConversionRes
 				if err := json.Unmarshal(blockWrapper.Block, &imgBlock); err != nil {
 					continue
 				}
-				// We use a placeholder path that main.go will resolve
-				// Actually, main.go needs to know about this.
-				// Let's assume standard markdown image syntax: ![alt](cid)
-				// The downloader will replace it or we pre-calculate the path?
-				// Better: Return the blob CID as the URL, and main.go does a string replace or we handle it here if we pass config.
-				// For now, let's use the blob ref link as the URL.
+				// Use blob CID as placeholder URL; main.go replaces it with the local path
 				sb.WriteString(fmt.Sprintf("![%s](%s)\n\n", imgBlock.Alt, imgBlock.Image.Ref.Link))
 				images = append(images, ImageRef{Blob: imgBlock.Image, Alt: imgBlock.Alt})
 
-            case "pub.leaflet.blocks.bskyPost":
-                var postBlock atproto.BskyPostBlock
-                if err := json.Unmarshal(blockWrapper.Block, &postBlock); err != nil {
-                    continue
-                }
-                // Render a link to the post for now, as we can't easily embed it without JS
-                postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", "did:...", lastPathPart(postBlock.PostRef.Uri))
-                // We don't have the handle here easily to make a pretty URL, but we can try.
-                // Actually, let's just make a blockquote link.
-                sb.WriteString(fmt.Sprintf("> [View on Bluesky](%s)\n\n", postURL)) // TODO: Improve this
+			case "pub.leaflet.blocks.bskyPost":
+				var postBlock atproto.BskyPostBlock
+				if err := json.Unmarshal(blockWrapper.Block, &postBlock); err != nil {
+					continue
+				}
+				// Render as a blockquote link to the Bluesky post
+				postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", "did:...", lastPathPart(postBlock.PostRef.Uri))
+				sb.WriteString(fmt.Sprintf("> [View on Bluesky](%s)\n\n", postURL))
 			}
 		}
 	}
@@ -102,63 +94,47 @@ func (c *Converter) ConvertLeaflet(doc *atproto.LeafletDocument) (*ConversionRes
 }
 
 func (c *Converter) renderText(block *atproto.TextBlock) string {
-	// Apply facets
-	// Facets are ranges. We need to insert markdown syntax at specific indices.
-	// This is tricky because inserting characters shifts indices.
-	// Best approach: Slice the string and reconstruct it.
+	// Apply facets to convert rich text to markdown
+	// Note: ATProto facets use byte offsets, not rune offsets
+	data := []byte(block.Plaintext)
 
-	// Sort facets by start index (descending) to avoid shifting issues?
-	// Actually, we should iterate from start to end, keeping track of current index.
-	
-	// Simplify: Just handle links for now.
-    // NOTE: Facets in ATProto are byte-offsets, not rune-offsets. Go strings are UTF-8.
-    
-    // Convert string to byte slice for easier indexing
-    data := []byte(block.Plaintext)
-    
-    // Map of byte_index -> string_to_insert
-    // But we wrap text.
-    
-    // Let's just do a linear pass if facets are non-overlapping and sorted.
-    // They should be.
-    
-    var sb strings.Builder
-    lastPos := 0
-    
-    for _, facet := range block.Facets {
-        start := facet.Index.ByteStart
-        end := facet.Index.ByteEnd
-        
-        if start < lastPos {
-            continue // Overlap or out of order
-        }
-        
-        // Append text before facet
-        sb.Write(data[lastPos:start])
-        
-        // Handle feature
-        text := string(data[start:end])
-        replacement := text
-        
-        for _, feat := range facet.Features {
-            if feat.Type == "pub.leaflet.richtext.facet#link" {
-                replacement = fmt.Sprintf("[%s](%s)", text, feat.URI)
-            } else if feat.Type == "pub.leaflet.richtext.facet#didMention" {
-                 replacement = fmt.Sprintf("[%s](https://bsky.app/profile/%s)", text, feat.Did)
-            }
-             // code facet? pub.leaflet.richtext.facet#code -> `text`
-            if feat.Type == "pub.leaflet.richtext.facet#code" {
-                replacement = fmt.Sprintf("`%s`", text)
-            }
-        }
-        
-        sb.WriteString(replacement)
-        lastPos = end
-    }
-    
-    sb.Write(data[lastPos:])
-    
-    return sb.String()
+	var sb strings.Builder
+	lastPos := 0
+
+	for _, facet := range block.Facets {
+		start := facet.Index.ByteStart
+		end := facet.Index.ByteEnd
+
+		if start < lastPos {
+			continue // Overlap or out of order
+		}
+
+		// Append text before facet
+		sb.Write(data[lastPos:start])
+
+		// Handle feature
+		text := string(data[start:end])
+		replacement := text
+
+		for _, feat := range facet.Features {
+			if feat.Type == "pub.leaflet.richtext.facet#link" {
+				replacement = fmt.Sprintf("[%s](%s)", text, feat.URI)
+			} else if feat.Type == "pub.leaflet.richtext.facet#didMention" {
+				replacement = fmt.Sprintf("[%s](https://bsky.app/profile/%s)", text, feat.Did)
+			}
+			// code facet? pub.leaflet.richtext.facet#code -> `text`
+			if feat.Type == "pub.leaflet.richtext.facet#code" {
+				replacement = fmt.Sprintf("`%s`", text)
+			}
+		}
+
+		sb.WriteString(replacement)
+		lastPos = end
+	}
+
+	sb.Write(data[lastPos:])
+
+	return sb.String()
 }
 
 func (c *Converter) renderList(sb *strings.Builder, items []atproto.ListItem, depth int) {

@@ -66,4 +66,3 @@ func (g *Generator) GeneratePost(data PostData) error {
 
 	return os.WriteFile(filePath, []byte(fullContent), 0644)
 }
-

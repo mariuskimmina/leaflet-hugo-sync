@@ -96,59 +96,31 @@ func (c *Client) ResolvePDS(ctx context.Context, did string) (string, error) {
 }
 
 func (c *Client) FetchEntries(ctx context.Context, repo string, collection string) ([]Record, error) {
-
 	var records []Record
-
 	cursor := ""
 
-
-
 	for {
-
 		params := map[string]interface{}{
-
 			"repo":       repo,
-
 			"collection": collection,
-
 			"limit":      100,
-
 		}
-
 		if cursor != "" {
-
 			params["cursor"] = cursor
-
 		}
-
-
 
 		var out ListRecordsResponse
-
 		if err := c.XRPC.Do(ctx, xrpc.Query, "", "com.atproto.repo.listRecords", params, nil, &out); err != nil {
-
 			return nil, fmt.Errorf("listing records: %w", err)
-
 		}
-
-
 
 		records = append(records, out.Records...)
 
-
-
 		if out.Cursor == nil || *out.Cursor == "" {
-
 			break
-
 		}
-
 		cursor = *out.Cursor
-
 	}
 
-
-
 	return records, nil
-
 }
