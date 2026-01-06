@@ -117,13 +117,12 @@ func (c *Converter) renderText(block *atproto.TextBlock) string {
 		replacement := text
 
 		for _, feat := range facet.Features {
-			if feat.Type == "pub.leaflet.richtext.facet#link" {
+			switch feat.Type {
+			case "pub.leaflet.richtext.facet#link":
 				replacement = fmt.Sprintf("[%s](%s)", text, feat.URI)
-			} else if feat.Type == "pub.leaflet.richtext.facet#didMention" {
+			case "pub.leaflet.richtext.facet#didMention":
 				replacement = fmt.Sprintf("[%s](https://bsky.app/profile/%s)", text, feat.Did)
-			}
-			// code facet? pub.leaflet.richtext.facet#code -> `text`
-			if feat.Type == "pub.leaflet.richtext.facet#code" {
+			case "pub.leaflet.richtext.facet#code":
 				replacement = fmt.Sprintf("`%s`", text)
 			}
 		}
