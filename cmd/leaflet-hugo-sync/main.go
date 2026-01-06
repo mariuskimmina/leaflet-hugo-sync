@@ -20,6 +20,15 @@ func lastPathPart(uri string) string {
 	return parts[len(parts)-1]
 }
 
+func sanitizeTitle(title string) string {
+	// Replace spaces with underscores and remove/replace unsafe characters
+	s := strings.ReplaceAll(title, " ", "_")
+	s = strings.ReplaceAll(s, "/", "_")
+	s = strings.ReplaceAll(s, "\\", "_")
+	s = strings.ReplaceAll(s, ":", "_")
+	return s
+}
+
 func main() {
 	configPath := flag.String("config", ".leaflet-sync.yaml", "Path to config file")
 	flag.Parse()
@@ -141,8 +150,9 @@ func main() {
 			finalContent = strings.ReplaceAll(finalContent, imgRef.Blob.Ref.Link, localPath)
 		}
 
-		// Slug generation
+		// Generate filename from title and slug from URI
 		slug := lastPathPart(rec.Uri)
+		filename := sanitizeTitle(doc.Title)
 
 		// Construct original URL
 		originalURL := fmt.Sprintf("https://leaflet.pub/%s", slug)
@@ -151,6 +161,7 @@ func main() {
 			Title:       doc.Title,
 			CreatedAt:   doc.PublishedAt,
 			Slug:        slug,
+			Filename:    filename,
 			Handle:      cfg.Source.Handle,
 			OriginalURL: originalURL,
 			Content:     finalContent,
