@@ -24,7 +24,6 @@ func NewDownloader(imagesDir, imagePathPrefix, pdsHost string) *Downloader {
 }
 
 func (d *Downloader) DownloadBlob(ctx context.Context, did string, cid string) (string, error) {
-	// Construct blob URL
 	// https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:xxx&cid=bafyxxx
 	url := fmt.Sprintf("%s/xrpc/com.atproto.sync.getBlob?did=%s&cid=%s", d.PDSHost, did, cid)
 
@@ -32,13 +31,13 @@ func (d *Downloader) DownloadBlob(ctx context.Context, did string, cid string) (
 		return "", err
 	}
 
-	ext := ".bin" // Default, should ideally check MIME
-	fileName := cid + ext
-	filePath := filepath.Join(d.ImagesDir, fileName)
-
-	// Check if already exists
-	if _, err := os.Stat(filePath); err == nil {
-		return filepath.Join(d.ImagePathPrefix, fileName), nil
+	// Check if file already exists (try common extensions)
+	for _, ext := range []string{".jpg", ".png", ".webp", ".gif", ".bin"} {
+		fileName := cid + ext
+		filePath := filepath.Join(d.ImagesDir, fileName)
+		if _, err := os.Stat(filePath); err == nil {
+			return filepath.Join(d.ImagePathPrefix, fileName), nil
+		}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -56,7 +55,8 @@ func (d *Downloader) DownloadBlob(ctx context.Context, did string, cid string) (
 		return "", fmt.Errorf("failed to download blob: %s", resp.Status)
 	}
 
-	// Try to guess extension from Content-Type
+	// Determine extension from Content-Type header
+	ext := ".bin"
 	contentType := resp.Header.Get("Content-Type")
 	switch contentType {
 	case "image/jpeg":
@@ -68,8 +68,8 @@ func (d *Downloader) DownloadBlob(ctx context.Context, did string, cid string) (
 	case "image/gif":
 		ext = ".gif"
 	}
-	fileName = cid + ext
-	filePath = filepath.Join(d.ImagesDir, fileName)
+	fileName := cid + ext
+	filePath := filepath.Join(d.ImagesDir, fileName)
 
 	out, err := os.Create(filePath)
 	if err != nil {
