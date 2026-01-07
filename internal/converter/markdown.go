@@ -9,7 +9,7 @@ import (
 )
 
 type Converter struct {
-	// No state needed; conversion is stateless
+	bskyEmbedStyle string // "link" (default) or "shortcode"
 }
 
 type ConversionResult struct {
@@ -22,8 +22,14 @@ type ImageRef struct {
 	Alt  string
 }
 
-func NewConverter() *Converter {
-	return &Converter{}
+func NewConverter(bskyEmbedStyle string) *Converter {
+	// Default to "link" if not specified or invalid
+	if bskyEmbedStyle != "shortcode" {
+		bskyEmbedStyle = "link"
+	}
+	return &Converter{
+		bskyEmbedStyle: bskyEmbedStyle,
+	}
 }
 
 func (c *Converter) ConvertLeaflet(doc *atproto.LeafletDocument) (*ConversionResult, error) {
@@ -82,9 +88,16 @@ func (c *Converter) ConvertLeaflet(doc *atproto.LeafletDocument) (*ConversionRes
 				}
 				// Render as a blockquote link to the Bluesky post
 				// Parse AT-URI: at://did:plc:abc123/app.bsky.feed.post/postID
-			did, postID := parseATUri(postBlock.PostRef.Uri)
-			postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", did, postID)
-				sb.WriteString(fmt.Sprintf("> [View on Bluesky](%s)\n\n", postURL))
+				did, postID := parseATUri(postBlock.PostRef.Uri)
+
+				if c.bskyEmbedStyle == "shortcode" {
+					// Render as Hugo shortcode for rich embed
+					sb.WriteString(fmt.Sprintf("{{< bsky did=\"%s\" postid=\"%s\" >}}\n\n", did, postID))
+				} else {
+					// Default: render as simple markdown link
+					postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", did, postID)
+					sb.WriteString(fmt.Sprintf("[View on Bluesky](%s)\n\n", postURL))
+				}
 			}
 		}
 	}
@@ -167,7 +180,7 @@ func parseATUri(uri string) (did string, recordKey string) {
 	// Split into parts
 	parts := strings.Split(uri, "/")
 	if len(parts) >= 3 {
-		did = parts[0]           // did:plc:abc123
+		did = parts[0]                  // did:plc:abc123
 		recordKey = parts[len(parts)-1] // 3mbrxzvw36c22
 	}
 

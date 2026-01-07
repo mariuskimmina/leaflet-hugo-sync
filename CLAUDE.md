@@ -86,7 +86,7 @@ The application follows this pipeline:
 
 **Configuration** (`internal/config/config.go`):
 - `Source`: Specifies handle, collection, optional publication_name
-- `Output`: Defines posts_dir, images_dir, image_path_prefix
+- `Output`: Defines posts_dir, images_dir, image_path_prefix, bsky_embed_style
 - `Template`: Go template strings for frontmatter and content
 
 ### Important Implementation Details
@@ -113,6 +113,7 @@ output:
   posts_dir: "content/posts/leaflet"
   images_dir: "static/images/leaflet"
   image_path_prefix: "/images/leaflet"
+  bsky_embed_style: "link"  # "link" (default) or "shortcode" for Hugo embeds
 
 template:
   frontmatter: |

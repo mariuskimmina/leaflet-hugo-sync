@@ -22,6 +22,7 @@ type Output struct {
 	PostsDir        string `yaml:"posts_dir"`
 	ImagesDir       string `yaml:"images_dir"`
 	ImagePathPrefix string `yaml:"image_path_prefix"`
+	BskyEmbedStyle  string `yaml:"bsky_embed_style"` // "link" (default) or "shortcode"
 }
 
 type Template struct {

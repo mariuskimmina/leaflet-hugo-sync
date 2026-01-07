@@ -25,7 +25,7 @@ func TestConvertLeaflet_TextBlock(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result, err := conv.ConvertLeaflet(doc)
 	if err != nil {
 		t.Fatalf("ConvertLeaflet failed: %v", err)
@@ -54,7 +54,7 @@ func TestConvertLeaflet_CodeBlock(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result, err := conv.ConvertLeaflet(doc)
 	if err != nil {
 		t.Fatalf("ConvertLeaflet failed: %v", err)
@@ -89,7 +89,7 @@ func TestConvertLeaflet_ImageBlock(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result, err := conv.ConvertLeaflet(doc)
 	if err != nil {
 		t.Fatalf("ConvertLeaflet failed: %v", err)
@@ -125,7 +125,7 @@ func TestRenderText_WithLinkFacet(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result := conv.renderText(block)
 
 	expected := "Check out [example.com](https://example.com) for more info"
@@ -152,7 +152,7 @@ func TestRenderText_WithInlineCode(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result := conv.renderText(block)
 
 	expected := "Use the `fmt.Println` function"
@@ -180,7 +180,7 @@ func TestRenderText_WithMention(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result := conv.renderText(block)
 
 	expected := "Thanks [@alice](https://bsky.app/profile/did:plc:alice123) for the help"
@@ -212,7 +212,7 @@ func TestConvertLeaflet_UnorderedList(t *testing.T) {
 		},
 	}
 
-	conv := NewConverter()
+	conv := NewConverter("")
 	result, err := conv.ConvertLeaflet(doc)
 	if err != nil {
 		t.Fatalf("ConvertLeaflet failed: %v", err)
@@ -220,6 +220,68 @@ func TestConvertLeaflet_UnorderedList(t *testing.T) {
 
 	if !strings.Contains(result.Markdown, "- First item") {
 		t.Errorf("expected list item, got %q", result.Markdown)
+	}
+}
+
+func TestConvertLeaflet_BskyPost_Link(t *testing.T) {
+	doc := &atproto.LeafletDocument{
+		Pages: []atproto.Page{
+			{
+				Blocks: []atproto.BlockWrapper{
+					{
+						Block: mustMarshal(atproto.BskyPostBlock{
+							Type: "pub.leaflet.blocks.bskyPost",
+							PostRef: atproto.PostRef{
+								Uri: "at://did:plc:abc123/app.bsky.feed.post/3mbrxzvw36c22",
+								Cid: "test-cid",
+							},
+						}),
+					},
+				},
+			},
+		},
+	}
+
+	conv := NewConverter("link") // Default link mode
+	result, err := conv.ConvertLeaflet(doc)
+	if err != nil {
+		t.Fatalf("ConvertLeaflet failed: %v", err)
+	}
+
+	expected := "[View on Bluesky](https://bsky.app/profile/did:plc:abc123/post/3mbrxzvw36c22)"
+	if !strings.Contains(result.Markdown, expected) {
+		t.Errorf("expected link format, got %q", result.Markdown)
+	}
+}
+
+func TestConvertLeaflet_BskyPost_Shortcode(t *testing.T) {
+	doc := &atproto.LeafletDocument{
+		Pages: []atproto.Page{
+			{
+				Blocks: []atproto.BlockWrapper{
+					{
+						Block: mustMarshal(atproto.BskyPostBlock{
+							Type: "pub.leaflet.blocks.bskyPost",
+							PostRef: atproto.PostRef{
+								Uri: "at://did:plc:abc123/app.bsky.feed.post/3mbrxzvw36c22",
+								Cid: "test-cid",
+							},
+						}),
+					},
+				},
+			},
+		},
+	}
+
+	conv := NewConverter("shortcode")
+	result, err := conv.ConvertLeaflet(doc)
+	if err != nil {
+		t.Fatalf("ConvertLeaflet failed: %v", err)
+	}
+
+	expected := `{{< bsky did="did:plc:abc123" postid="3mbrxzvw36c22" >}}`
+	if !strings.Contains(result.Markdown, expected) {
+		t.Errorf("expected shortcode format, got %q", result.Markdown)
 	}
 }
 
