@@ -100,7 +100,7 @@ func main() {
 
 	downloader := media.NewDownloader(cfg.Output.ImagesDir, cfg.Output.ImagePathPrefix, pdsClient.XRPC.Host)
 	gen := generator.NewGenerator(cfg)
-	conv := converter.NewConverter()
+	conv := converter.NewConverter(cfg.Output.BskyEmbedStyle)
 
 	for _, rec := range records {
 		// Try to unmarshal as LeafletDocument

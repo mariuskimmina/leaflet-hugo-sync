@@ -1,0 +1,23 @@
+{{/*
+  BlueSky Post Embed Shortcode (Enhanced with oEmbed)
+
+  Usage: {{< bsky-oembed did="did:plc:abc123" postid="3mbrxzvw36c22" >}}
+
+  This shortcode uses BlueSky's iframe embed for rich post display.
+  Copy this file to your Hugo site's layouts/shortcodes/ directory as bsky.html
+*/}}
+
+{{ $did := .Get "did" }}
+{{ $postid := .Get "postid" }}
+{{ $url := printf "https://bsky.app/profile/%s/post/%s" $did $postid }}
+
+<div class="bsky-embed-container" style="margin: 1.5em 0;">
+  <blockquote class="bluesky-embed" data-bluesky-uri="at://{{ $did }}/app.bsky.feed.post/{{ $postid }}" data-bluesky-cid="">
+    <p lang="en">
+      <a href="{{ $url }}" target="_blank" rel="noopener noreferrer">
+        View post on Bluesky
+      </a>
+    </p>
+  </blockquote>
+  <script async src="https://embed.bsky.app/static/embed.js" charset="utf-8"></script>
+</div>
