@@ -81,7 +81,9 @@ func (c *Converter) ConvertLeaflet(doc *atproto.LeafletDocument) (*ConversionRes
 					continue
 				}
 				// Render as a blockquote link to the Bluesky post
-				postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", "did:...", lastPathPart(postBlock.PostRef.Uri))
+				// Parse AT-URI: at://did:plc:abc123/app.bsky.feed.post/postID
+			did, postID := parseATUri(postBlock.PostRef.Uri)
+			postURL := fmt.Sprintf("https://bsky.app/profile/%s/post/%s", did, postID)
 				sb.WriteString(fmt.Sprintf("> [View on Bluesky](%s)\n\n", postURL))
 			}
 		}
@@ -153,4 +155,21 @@ func (c *Converter) renderList(sb *strings.Builder, items []atproto.ListItem, de
 func lastPathPart(uri string) string {
 	parts := strings.Split(uri, "/")
 	return parts[len(parts)-1]
+}
+
+// parseATUri extracts DID and record key from an AT-URI
+// Example: at://did:plc:abc123/app.bsky.feed.post/3mbrxzvw36c22
+// Returns: (did:plc:abc123, 3mbrxzvw36c22)
+func parseATUri(uri string) (did string, recordKey string) {
+	// Remove "at://" prefix
+	uri = strings.TrimPrefix(uri, "at://")
+
+	// Split into parts
+	parts := strings.Split(uri, "/")
+	if len(parts) >= 3 {
+		did = parts[0]           // did:plc:abc123
+		recordKey = parts[len(parts)-1] // 3mbrxzvw36c22
+	}
+
+	return did, recordKey
 }
